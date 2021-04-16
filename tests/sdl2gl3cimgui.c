@@ -1,14 +1,18 @@
-#include "config_in.h"
-#define main SDL_main
+//#include "config_in.h"
+//#define main SDL_main
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+
 #include "cimgui.h"
-#include "imgui_impl_sdl.h"
-#include "imgui_impl_opengl3.h"
+//#include "imgui_impl_sdl.h" //it define in cimgui.h conflict
+//#include "imgui_impl_opengl3.h" //it define in cimgui.h conflict
+#include <stdlib.h>
 #include <stdio.h>
 #include <SDL.h>
-//#define main SDL_main
+
+#define main SDL_main
 //#undef main
 
-//#define IMGUI_IMPL_OPENGL_LOADER_GL3W 0
+//#define IMGUI_IMPL_OPENGL_LOADER_GL3W 0 //not here, has be config.h in *.h header
 
 // About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
 // Helper libraries are often used for this purpose! Here we are supporting a few common ones: gl3w, glew, glad.
@@ -26,7 +30,14 @@
 #include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #endif
 
-//#include <glad/gl.h>  // Initialize with gladLoadGL()
+/*
+int main(int argc, char* argv[])
+{
+  printf("Hello, World!\n");
+  system("pause"); //this pauses the program until you press any key 
+  return 0;
+}
+*/
 
 SDL_Window *window = NULL;
 
@@ -61,9 +72,14 @@ int main(int argc, char* argv[])
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_DisplayMode current;
   SDL_GetCurrentDisplayMode(0, &current);
-  
+  /*
   window = SDL_CreateWindow(
       "Hello", 0, 0, 1024, 768,
+      SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+      );
+      */
+  window = SDL_CreateWindow(
+      "SDL2 GL3 Config", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768,
       SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
       );
   if (window == NULL) {
@@ -75,7 +91,7 @@ int main(int argc, char* argv[])
   SDL_GL_SetSwapInterval(1);  // enable vsync
 
   // check opengl version sdl uses
-  //SDL_Log("opengl version: %s", (char*)glGetString(GL_VERSION));
+  //SDL_Log("opengl version: %s", (char*)glGetString(GL_VERSION)); //not this will crash when glad is used
 
   // Initialize OpenGL loader
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
@@ -83,7 +99,12 @@ int main(int argc, char* argv[])
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
   bool err = glewInit() != GLEW_OK;
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-  bool err = gladLoadGL() == 0;
+  //bool err = gladLoadGL() == 0; //does not have it
+  bool err = gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress) == 0;
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD2)
+  //bool err = gladLoadGL() == 0; //does not have it
+  //bool err = gladLoadGL((GLADloadproc) SDL_GL_GetProcAddress)) == 0;
+  bool err = gladLoaderLoadGL() == 0;
 #endif
   if (err)
   {

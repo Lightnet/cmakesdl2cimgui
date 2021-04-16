@@ -10,16 +10,16 @@ message("[[===  init Project ===]]")
 # Project Name 
 project(SDL2App)
 
+# https://bewagner.net/programming/2020/05/02/cmake-fetchcontent/
+#set(FETCHCONTENT_FULLY_DISCONNECTED ON) # When this option is enabled, no attempt is made to download or update any content.
+#set(FETCHCONTENT_UPDATES_DISCONNECTED ON)# 
+
 # project info config to prefix name
 #message("PROJECT_NAME:${PROJECT_NAME}")
 #message("PROJECT_BINARY_DIR:${PROJECT_BINARY_DIR}")
 #message("PROJECT_SOURCE_DIR:${PROJECT_SOURCE_DIR}")
 
 # must set output build dir by default is none
-message("CMAKE_ARCHIVE_OUTPUT_DIRECTORY: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
-message("CMAKE_LIBRARY_OUTPUT_DIRECTORY: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-message("CMAKE_RUNTIME_OUTPUT_DIRECTORY: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
 # user must config manual
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -33,45 +33,53 @@ message("CMAKE_RUNTIME_OUTPUT_DIRECTORY: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 # ENTRY POINT FILE / TEST
 #================================================
 #set(ENTRYPOINT WindowSDL2.cpp)
-set(ENTRYPOINT tests/WindowSDL2ttf.cpp)
+#set(ENTRYPOINT tests/WindowSDL2ttf.cpp)
 #================================================
 # SETUP BUILD
 #================================================
-# https://github.com/haxpor/sdl2-cimgui-demo/blob/master/src/main.c
-# https://github.com/canoi12/cimgui_c_sdl2_example/
-# https://github.com/canoi12/cimgui_c_sdl2_example/blob/master/CMakeLists.txt
-# https://stackoverflow.com/questions/15201064/cmake-conditional-preprocessor-define-on-code
+
 #add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GL3W=0)
 #add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD2=1)
-#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GL3W=0)
-#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW=0)
-#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD=0) #nope
-#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD2=1) #nope
 
-#add_definitions(IMGUI_IMPL_OPENGL_LOADER_GL3W=0)
-#add_definitions(IMGUI_IMPL_OPENGL_LOADER_GLEW=0)
-#add_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD=0)
-#add_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD2)
+# -D<name> 
+# -DIMGUI_IMPL_OPENGL_LOADER_GLEW
+# header file
+#define IMGUI_IMPL_OPENGL_LOADER_GLEW
+
+# Uncomment one of opengl setting in define
+
+#add_definitions(-DIMGUI_IMPL_OPENGL_ES2=0)
+#add_definitions(-DIMGUI_IMPL_OPENGL_ES3=0)
+add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GL3W=0)# imgui_impl_opengl3.h # imgui Default to GL3W embedded in our repository
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW=0)
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD=0)
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD2=0)
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLBINDING2=0)
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLBINDING3=0)
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM=0)
 
 #TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GL3W=0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD2=1)
 
-#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD=1)
-#target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_API=extern\ \"C\")
-#target_compile_definitions(${PROJECT_NAME} IMGUI_IMPL_API=extern\ \"C\")
+#target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_API=extern\ \"C\") # fail
+#target_compile_definitions(${PROJECT_NAME} IMGUI_IMPL_API=extern\ \"C\") # fail
 #target_compile_definitions(imgui_impl PRIVATE IMGUI_IMPL_API=extern\ \"C\") # fail
+
+# https://bewagner.net/programming/2020/05/02/cmake-fetchcontent/
+#set(FETCHCONTENT_FULLY_DISCONNECTED ON) # When this option is enabled, no attempt is made to download or update any content.
+#set(FETCHCONTENT_UPDATES_DISCONNECTED ON) # 
 
 # 
 set(ENABLE_FREETYPE ON)
 set(ENABLE_SDL2 ON)
 set(ENABLE_SDL2_TTF OFF)
-set(ENABLE_SDL2_IMAGE OFF) # disable
+set(ENABLE_SDL2_IMAGE OFF) # disable 
 set(ENABLE_SDL2_MIXER OFF) # disable
 set(ENABLE_CIMGUI ON)
 
-set(ENABLE_GLEW OFF) 
-set(ENABLE_GL3W ON) 
-set(ENABLE_GLAD OFF)
-set(ENABLE_GLAD2 OFF)
+set(ENABLE_GL3W ON) # works #default from imgui
+set(ENABLE_GLEW OFF) # work
+set(ENABLE_GLAD OFF) # work
+set(ENABLE_GLAD2 OFF) # work
 
 set(SDL2_GIT_VERSION release-2.0.14) # SDL GIT RELEASE TAG
 set(SDL_TTF_GIT_VERSION release-2.0.15) # SDL GIT RELEASE TAG
@@ -82,15 +90,20 @@ set(SDL_MIXER_GIT_VERSION master) # SDL GIT RELEASE TAG
 #set(SDL_NET_GIT_VERSION master) # no cmakelists # 2021-04-14
 #set(SDL_RTF_GIT_VERSION master) # no cmakelists # 2021-04-14
 
-set(SDL2_ADDED true) # ALIAS DLL like SDL2::SDL2.lob
+set(SDL2_ADDED OFF) # ALIAS DLL like SDL2::SDL2.lob
 
 #message("OUTPUTCONFIG" OUTPUTCONFIG)
 #message(  ${CMAKE_CONFIGURATION_TYPES} )
 #message("OUTPUTCONFIG >>>>>>>>>>>" )
 
+# https://cmake.org/cmake/help/latest/module/FetchContent.html
+# dev settings for fast compile time
+#set(FETCHCONTENT_FULLY_DISCONNECTED ON) # Stop Download and Update
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON) # Stop update
+
 # build tools
 set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
 #set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -109,7 +122,9 @@ set(CPP_SOURCE_FILES "")
 set(CPP_HEADER_FILES "")
 
 #set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR};${CMAKE_MODULE_PATH}/cmake/sdl2")
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+#list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+
+
 if(ENABLE_FREETYPE)
   if (NOT freetype_FOUND) # If there's none, fetch and build
     include(FetchContent)
@@ -336,24 +351,27 @@ endif()
 message("~~~ CHECKING OPENGL... ~~~")
 
 if(ENABLE_GLEW)
-  if (NOT glewgit_FOUND)
+  if (NOT glew_FOUND)
     include(FetchContent)
     FetchContent_Declare(
-      glewgit
+      glew
       URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0-win32.zip
     )
-    FetchContent_GetProperties(glewgit)
-    if (NOT glewgit_POPULATED) # Have we downloaded glfw yet?
+    FetchContent_GetProperties(glew)
+    if (NOT glew_POPULATED) # Have we downloaded glfw yet?
       set(FETCHCONTENT_QUIET NO)
-      FetchContent_Populate(glewgit)
+      FetchContent_Populate(glew)
       
-      include_directories(${glewgit_SOURCE_DIR}/include)
-      list(APPEND CPP_INCLUDE_DIRS ${glewgit_SOURCE_DIR}/include)
+      include_directories(${glew_SOURCE_DIR}/include)
+      list(APPEND CPP_INCLUDE_DIRS ${glew_SOURCE_DIR}/include)
 
-      #add_subdirectory(${glfw_SOURCE_DIR})
-      message("glewgit_SOURCE_DIR " ${glewgit_SOURCE_DIR})
-      #message("glewgit_BINARY_DIR " ${glewgit_BINARY_DIR})
-      #add_subdirectory(${glewgit_SOURCE_DIR} ${glewgit_BINARY_DIR})
+      message("glew_SOURCE_DIR " ${glew_SOURCE_DIR})
+      #message("glew_BINARY_DIR " ${glew_BINARY_DIR})
+
+      list(APPEND CPP_HEADER_FILES ${glew_SOURCE_DIR}/include/GL/glew.h)
+      
+      include_directories(${glew_SOURCE_DIR}/include)
+      list(APPEND CPP_INCLUDE_DIRS ${glew_SOURCE_DIR}/include)
 
     endif()
   endif()
@@ -378,12 +396,11 @@ if(ENABLE_GL3W)
       message("GL3W GITHUB BIN >>> " ${gl3w_BINARY_DIR})
 
       list(APPEND CPP_INCLUDE_DIRS ${gl3w_BINARY_DIR}/include)
-      list(APPEND CPP_INCLUDE_DIRS ${gl3w_BINARY_DIR}/src)
+      #list(APPEND CPP_INCLUDE_DIRS ${gl3w_BINARY_DIR}/src)
 
       list(APPEND CPP_HEADER_FILES ${gl3w_BINARY_DIR}/include/GL/gl3w.h)
       list(APPEND CPP_HEADER_FILES ${gl3w_BINARY_DIR}/src/gl3w.c)
       
-
       add_subdirectory(${gl3w_SOURCE_DIR} ${gl3w_BINARY_DIR}) #add to build in sub dir
     endif()
   endif()
@@ -393,14 +410,15 @@ if(ENABLE_GLAD)
   set(glad_DIR ${PROJECT_SOURCE_DIR}/thirdparty/glad)
   list(APPEND CPP_HEADER_FILES ${glad_DIR}/include/glad/glad.h)
   list(APPEND CPP_INCLUDE_DIRS ${glad_DIR}/include)
+  list(APPEND CPP_SOURCE_FILES ${glad_DIR}/src/glad.c)
   #include_directories(${CPP_INCLUDE_DIRS})
 endif()
 
 if(ENABLE_GLAD2)
-  set(glad_DIR ${PROJECT_SOURCE_DIR}/thirdparty/glad2)
-  list(APPEND CPP_HEADER_FILES ${glad_DIR}/include/glad/gl.h)
-  list(APPEND CPP_INCLUDE_DIRS ${glad_DIR}/include)
-
+  set(glad2_DIR ${PROJECT_SOURCE_DIR}/thirdparty/glad2)
+  list(APPEND CPP_HEADER_FILES ${glad2_DIR}/include/glad/gl.h)
+  list(APPEND CPP_INCLUDE_DIRS ${glad2_DIR}/include)
+  list(APPEND CPP_SOURCE_FILES ${glad2_DIR}/src/gl.c)
   include_directories(${CPP_INCLUDE_DIRS})
 endif()
 
@@ -458,18 +476,19 @@ include_directories(${CPP_INCLUDE_DIRS})
 # EXECUTE APPLICATION PROGRAM
 #================================================
 add_executable(${PROJECT_NAME}
-	#${ENTRYPOINT}
-  #tests/config_in.h
-  #tests/helloworld.c
-  #tests/helloworld.c
-  tests/sdl2gl3wcimgui.c
-  #tests/WindowSDL2.cpp
-  #tests/WindowSDL2ttf.cpp
-  #tests/sdl2gl3cimgui.c
-  #tests/sdl2gl3w.cpp
-  #tests/sdl2Image.cpp #not working yet
+  tests/config_in.h
   ${CPP_HEADER_FILES}
   ${CPP_SOURCE_FILES}
+	#${ENTRYPOINT}
+  
+  #tests/helloworld.c
+  #tests/sdl2gl3wcimgui.c # works GL3W
+  tests/sdl2gl3cimgui.c # GL3 # works
+  #tests/WindowSDL2.cpp
+  #tests/WindowSDL2ttf.cpp
+  #tests/sdl2gl3w.cpp
+  #tests/sdl2Image.cpp #not working yet
+  
 )
 # https://stackoverflow.com/questions/28395833/using-sdl2-with-cmake
 target_link_libraries(${PROJECT_NAME} 
@@ -480,13 +499,28 @@ target_link_libraries(${PROJECT_NAME}
   #freetype
   #SDL2_ttf
   cimgui
+  opengl32
+  #glew32
   #glu32
-  #opengl32
+  
   #SDL2_image
   #jpeg
 )
-
-#COPY FONT
+if(ENABLE_GLEW)
+  add_custom_command(TARGET ${PROJECT_NAME} 
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy 
+    ${glew_SOURCE_DIR}/lib/Release/x64/glew32.lib
+    ${PROJECT_BINARY_DIR}/Debug
+  )
+  add_custom_command(TARGET ${PROJECT_NAME} 
+    POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy 
+    ${glew_SOURCE_DIR}/bin/Release/x64/glew32.dll
+    ${PROJECT_BINARY_DIR}/Debug
+  )
+endif()
+#COPY FONTS
 set(FONT ${PROJECT_SOURCE_DIR}/font)
 set(FONT_BIN ${PROJECT_BINARY_DIR}/Debug/font)
 add_custom_target(copy-files-font ALL
@@ -494,7 +528,7 @@ add_custom_target(copy-files-font ALL
     ${FONT}
     ${FONT_BIN}
 )
-
+# COPY IMAGES
 set(IMAGES ${PROJECT_SOURCE_DIR}/images)
 set(IMAGES_BIN ${PROJECT_BINARY_DIR}/Debug/images)
 add_custom_target(copy-files-iamges ALL

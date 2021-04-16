@@ -23,7 +23,6 @@ int main(int argc, char ** argv) {
 	SDL_Window* window = SDL_CreateWindow("Hello Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	SDL_GLContext context = SDL_GL_CreateContext(window);
 
-
 	if (!window) {
 		printf("Failed to init Window\n");
 		exit(1);
@@ -42,7 +41,6 @@ int main(int argc, char ** argv) {
 	igStyleColorsDark(NULL);
 
 	GLuint vao, vbo;
-
 
 	SDL_Event event;
 	int running = 1;
