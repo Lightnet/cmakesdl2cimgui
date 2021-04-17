@@ -17,14 +17,14 @@ int main(int argc, char *argv[])
 
   SDL_Log("Setup SDL2 Window ");
 
-  if (window == nullptr){
+  if (window == NULL){
     SDL_Log("Could not create a window: %s", SDL_GetError());
     return -1;
   }
 
   //SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
   SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  if (renderer == nullptr){
+  if (renderer == NULL){
     SDL_Log("Could not create a renderer: %s", SDL_GetError());
     return -1;
   }

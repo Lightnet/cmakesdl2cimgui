@@ -75,6 +75,15 @@ Download first time. Then set not to recheck when connect to internet or recompi
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON) # Skip Update
 ```
 
+```c
+//some code will error on main
+#include <SDL.h>
+#define main SDL_main
+#undef main
+```
+## c in vulkan:
+  Not much src or example files for c language setup. There are few but it take time to look at how it works. From vulkan, sdl and other yet look into yet. There one example file each but it a lot in one file.
+
 # Credits:
   * Help of font loading.
     * https://github.com/grimfang4/SDL_FontCache

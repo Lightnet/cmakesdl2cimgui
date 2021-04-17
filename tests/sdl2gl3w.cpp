@@ -1,8 +1,10 @@
 // sdl2: http://www.libsdl.org/
 
+
 #include <GL/gl3w.h>
 #include <SDL.h>
-
+#define main SDL_main
+#undef main
 #include <iostream>
 #include <string>
 #include <vector>

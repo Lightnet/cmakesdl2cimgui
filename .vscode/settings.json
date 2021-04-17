@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "iostream": "cpp",
+    "sdl_syswm.h": "c"
+  }
+}

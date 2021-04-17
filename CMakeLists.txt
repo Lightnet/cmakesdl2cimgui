@@ -11,7 +11,7 @@ message("[[===  init Project ===]]")
 project(SDL2App)
 
 # https://bewagner.net/programming/2020/05/02/cmake-fetchcontent/
-#set(FETCHCONTENT_FULLY_DISCONNECTED ON) # When this option is enabled, no attempt is made to download or update any content.
+set(FETCHCONTENT_FULLY_DISCONNECTED ON) # When this option is enabled, no attempt is made to download or update any content.
 #set(FETCHCONTENT_UPDATES_DISCONNECTED ON)# 
 
 # project info config to prefix name
@@ -71,10 +71,15 @@ add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GL3W=0)# imgui_impl_opengl3.h # imgui
 # 
 set(ENABLE_FREETYPE ON)
 set(ENABLE_SDL2 ON)
-set(ENABLE_SDL2_TTF OFF)
-set(ENABLE_SDL2_IMAGE OFF) # disable 
-set(ENABLE_SDL2_MIXER OFF) # disable
-set(ENABLE_CIMGUI ON)
+set(SDL2_ADDED ON) # ALIAS DLL like SDL2::SDL2.lib
+
+set(ENABLE_VULKAN ON)
+
+set(ENABLE_SDL2_TTF OFF) 
+set(ENABLE_SDL2_IMAGE ON) # pass 
+set(ENABLE_SDL2_MIXER OFF) # disable # not tested.
+set(ENABLE_CIMGUI ON) # CIMGUI
+set(ENABLE_IMGUI OFF) # C++ IMGUI
 
 set(ENABLE_GL3W ON) # works #default from imgui
 set(ENABLE_GLEW OFF) # work
@@ -89,8 +94,6 @@ set(SDL_IMAGE_GIT_VERSION  main) # SDL GIT RELEASE TAG
 set(SDL_MIXER_GIT_VERSION master) # SDL GIT RELEASE TAG
 #set(SDL_NET_GIT_VERSION master) # no cmakelists # 2021-04-14
 #set(SDL_RTF_GIT_VERSION master) # no cmakelists # 2021-04-14
-
-set(SDL2_ADDED OFF) # ALIAS DLL like SDL2::SDL2.lob
 
 #message("OUTPUTCONFIG" OUTPUTCONFIG)
 #message(  ${CMAKE_CONFIGURATION_TYPES} )
@@ -317,10 +320,11 @@ if(ENABLE_SDL2_IMAGE)
 
       list(APPEND CPP_INCLUDE_DIRS ${sdl_image_SOURCE_DIR})
       
-      #set(SUPPORT_JPG OFF CACHE BOOL "" FORCE)
-      #set(SUPPORT_PNG OFF CACHE BOOL "" FORCE)
-      #set(BUILD_SHOWIMAGE OFF CACHE BOOL "" FORCE)
-      #set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+      set(SUPPORT_JPG OFF CACHE BOOL "" FORCE)
+      set(SUPPORT_PNG ON CACHE BOOL "" FORCE)
+      set(BUILD_SHOWIMAGE OFF CACHE BOOL "" FORCE)
+      set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+      # BUILD_SHARED_LIBS OFF is LIB
 
       add_subdirectory(${sdl_image_SOURCE_DIR} ${sdl_image_BINARY_DIR}) #add to build in sub dir
     endif()
@@ -422,6 +426,31 @@ if(ENABLE_GLAD2)
   include_directories(${CPP_INCLUDE_DIRS})
 endif()
 
+if(ENABLE_VULKAN)
+  # it can be found in cmake folder program files
+  find_package(Vulkan) #
+  # note vulkan has to be install normal since script default
+  if (Vulkan_FOUND)
+    list(APPEND CPP_INCLUDE_DIRS ${Vulkan_INCLUDE_DIRS})
+    set(VULKAN_PATH ${Vulkan_INCLUDE_DIRS})
+    STRING(REGEX REPLACE "/Include" "" VULKAN_PATH ${VULKAN_PATH})
+    # Include Vulkan header files from Vulkan SDK
+    #message("VULKAN_PATH " ${VULKAN_PATH})
+  endif()
+
+  if (NOT Vulkan_FOUND) # If there's none
+    message("NOT FOUND VULKAN DIR")
+    return()
+  endif()
+  set(VULKAN_LIB_LIST "vulkan-1")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    include_directories(${Vulkan_INCLUDE_DIRS})
+    # Link directory for vulkan-1
+    link_directories(${VULKAN_PATH}/Bin;${VULKAN_PATH}/Lib;)
+  endif()
+endif()
+
+
 message("~~~ CHECKING GRAPHIC INTERFACE... ~~~")
 
 if(ENABLE_CIMGUI)
@@ -467,6 +496,45 @@ if(ENABLE_CIMGUI)
   endif()
 endif()
 
+if(ENABLE_IMGUI)
+  if (NOT imgui_FOUND) # If there's none, fetch and build sdl
+    include(FetchContent)
+    FetchContent_Declare(
+      imgui
+      GIT_REPOSITORY https://github.com/ocornut/imgui.git
+      GIT_TAG v1.82
+    )
+    FetchContent_GetProperties(cimgui)
+    if (NOT imgui_POPULATED) # Have we downloaded raylib yet?
+      set(FETCHCONTENT_QUIET NO)
+      FetchContent_Populate(imgui)
+      # utility to setup the downloaded library for use
+      #FetchContent_MakeAvailable(imgui)
+      #list(APPEND CPP_INCLUDE_DIRS ${imgui_SOURCE_DIR})
+      list(APPEND CPP_INCLUDE_DIRS ${imgui_SOURCE_DIR})
+      list(APPEND CPP_INCLUDE_DIRS ${imgui_SOURCE_DIR}/backends)
+
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/imgui.cpp)
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/imgui_demo.cpp)
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/imgui_draw.cpp)
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/imgui_tables.cpp)
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/imgui_widgets.cpp)
+
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.cpp)
+      list(APPEND CPP_SOURCE_FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp)
+
+      list(APPEND CPP_HEADER_FILES ${imgui_SOURCE_DIR}/imgui.h)
+      list(APPEND CPP_HEADER_FILES ${imgui_SOURCE_DIR}/imconfig.h)
+      list(APPEND CPP_HEADER_FILES ${imgui_SOURCE_DIR}/imgui_internal.h)
+
+      list(APPEND CPP_HEADER_FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.h)
+      list(APPEND CPP_HEADER_FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.h)
+
+      #add_subdirectory(${imgui_SOURCE_DIR} ${imgui_BINARY_DIR}) #add to build in sub dir
+    endif()
+  endif()
+endif()
+
 #message("PROJECT_BINARY_DIR "${PROJECT_BINARY_DIR})
 # https://github.com/cpm-cmake/CPM.cmake/issues/144
 
@@ -476,19 +544,22 @@ include_directories(${CPP_INCLUDE_DIRS})
 # EXECUTE APPLICATION PROGRAM
 #================================================
 add_executable(${PROJECT_NAME}
-  tests/config_in.h
+  #tests/config_in.h
   ${CPP_HEADER_FILES}
   ${CPP_SOURCE_FILES}
 	#${ENTRYPOINT}
-  
+
+  #tests/sdl2vaulkanc.c
+  #tests/sdl2vaulkancpp.cpp
+  #tests/sdl2vulkan.c
   #tests/helloworld.c
-  #tests/sdl2gl3wcimgui.c # works GL3W
-  tests/sdl2gl3cimgui.c # GL3 # works
+  #tests/sdl2gl3wcimgui.c # pass GL3W
+  tests/sdl2gl3cimgui.c # GL3 # pass
   #tests/WindowSDL2.cpp
   #tests/WindowSDL2ttf.cpp
   #tests/sdl2gl3w.cpp
-  #tests/sdl2Image.cpp #not working yet
-  
+  #tests/sdl2Image01.cpp # pass
+  #tests/sdl2Image02.cpp # pass
 )
 # https://stackoverflow.com/questions/28395833/using-sdl2-with-cmake
 target_link_libraries(${PROJECT_NAME} 
@@ -496,15 +567,15 @@ target_link_libraries(${PROJECT_NAME}
 	SDL2main
 	SDL2-static
   SDL2
+  SDL2_image
   #freetype
   #SDL2_ttf
   cimgui
   opengl32
   #glew32
   #glu32
-  
-  #SDL2_image
   #jpeg
+  ${VULKAN_LIB_LIST}
 )
 if(ENABLE_GLEW)
   add_custom_command(TARGET ${PROJECT_NAME} 

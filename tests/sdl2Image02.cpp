@@ -5,6 +5,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 
 //Screen dimension constants
@@ -50,6 +51,7 @@ bool init()
 		if( gWindow == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+			system("pause");
 			success = false;
 		}
 		else
@@ -59,6 +61,7 @@ bool init()
 			if( !( IMG_Init( imgFlags ) & imgFlags ) )
 			{
 				printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+				system("pause");
 				success = false;
 			}
 			else
@@ -78,10 +81,11 @@ bool loadMedia()
 	bool success = true;
 
 	//Load PNG surface
-	gPNGSurface = loadSurface( "hello_world.png" );
+	gPNGSurface = loadSurface( "images/hello_world.png" );
 	if( gPNGSurface == NULL )
 	{
 		printf( "Failed to load PNG image!\n" );
+		system("pause");
 		success = false;
 	}
 

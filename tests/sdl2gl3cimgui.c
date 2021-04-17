@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
       static float f = 0.0f;
       static int counter = 0;
 
-      igBegin("Hello, world!", NULL, 0);
+      igBegin("Hello, world! cimgui with SDL2 and opengl3!", NULL, 0);
       igText("This is some useful text");
       igCheckbox("Demo window", &showDemoWindow);
       igCheckbox("Another window", &showAnotherWindow);
